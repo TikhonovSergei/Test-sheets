@@ -27,15 +27,23 @@ def read_sheet():
     result_values = results['valueRanges'][0]['values']
     order_lst = Orders.objects.all()
     order_number = {}
+    add_order = {}
     for order in order_lst:
-        order_number[order.number_order] = True
+        add_order['data_deliveries'] = order.data_deliveries
+        add_order['price_dolars'] = order.price_dolars
+        order_number[order.number_order] = add_order
     responce = requests.post(url='http://www.cbr.ru/scripts/XML_daily.asp?')
     tree = etree.XML(responce.content)
     kurs = 57.5
     for val in result_values:
         rubles = int(val[2]) * kurs
         if val[1] in order_number:
-            pass
+            if order_number[val[1]]['price_dolars'] != val[2] or order_number[val[1]]['data_deliveries'] != datetime.strptime(val[3], "%d.%m.%Y").date():
+                order = Orders.objects.get(number_order = val[1])
+                order.price_dolars = val[2]
+                order.price_rubles = rubles
+                order.data_deliveries = datetime.strptime(val[3], "%d.%m.%Y").date()
+                order.save()
         else:
             order = Orders(number = val[0], number_order = int(val[1]), price_dolars = val[2], price_rubles = rubles, data_deliveries = datetime.strptime(val[3], "%d.%m.%Y").date())
             order.save()
