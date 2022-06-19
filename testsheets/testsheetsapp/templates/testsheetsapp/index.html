@@ -1,0 +1,47 @@
+﻿
+{% load static %}
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="" />
+<meta http-equiv="CACHE-CONTROL" content="NO-CACHE" />
+<meta http-equiv="PRAGMA" content="NO-CACHE" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+</head>
+
+
+<body >
+	
+{% block header%}
+
+<header>
+</header>
+
+{% endblock header %}
+
+{% block content%}
+
+<h1>Данные из файла</h1>
+{% if sheet_lst %}
+<table>
+    <head><th>№</th><th>№ заказа</th><th>Стоимость в доларах</th><th>Стоимость в рублях</th><th>Дата поставки</th></head>
+    {% for order in  sheet_lst %}
+        
+        <tr><th>{{order.number}}</th><td>{{order.number_order}}</td><td>{{order.price_dolars}} $</td><td>{{order.price_rubles}} руб.</td><td>{{order.data_deliveries}} </td></tr>
+
+    {% endfor %}
+</table>
+{% endif %}
+{% endblock content %}
+
+{% block footer%}
+<footer>
+
+</footer>
+{% endblock footer%}
+</body></html>
+
+
