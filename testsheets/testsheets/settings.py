@@ -138,6 +138,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'testsheetsapp.tasks.read_sheet',
         'schedule': crontab(minute='*/5'),
     },
+    'send_message': {
+        'task': 'testsheetsapp.tasks.send_message',
+        'schedule': crontab(hour=5, minute = 48),
+    },
 }
 # REDIS related settings 
 REDIS_HOST = 'localhost'

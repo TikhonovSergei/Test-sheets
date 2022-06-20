@@ -1,12 +1,14 @@
 
 from django.conf import settings
+from datetime import date
+import telebot
 from celery import shared_task
 from .celery import app
 import httplib2 
 import apiclient
 from datetime import datetime
 import requests
-from lxml import etree
+import xml.etree.ElementTree as ET
 from oauth2client.service_account import ServiceAccountCredentials
 from .models import *
  
@@ -33,8 +35,10 @@ def read_sheet():
         add_order['price_dolars'] = order.price_dolars
         order_number[order.number_order] = add_order
     responce = requests.post(url='http://www.cbr.ru/scripts/XML_daily.asp?')
-    tree = etree.XML(responce.content)
-    kurs = 57.5
+    tree = ET.fromstring(responce.content)
+    for child in tree.findall('.Valute[@ID="R01235"]'):
+        for ch in child.findall('.Value'):
+            kurs = ch.text.replace(',','.')
     for val in result_values:
         rubles = int(val[2]) * kurs
         if val[1] in order_number:
@@ -48,3 +52,12 @@ def read_sheet():
             order = Orders(number = val[0], number_order = int(val[1]), price_dolars = val[2], price_rubles = rubles, data_deliveries = datetime.strptime(val[3], "%d.%m.%Y").date())
             order.save()
 
+@shared_task
+@app.task
+def send_message():
+    '''Задача отправки сообщений по дате'''
+    user_id = 1111
+    order_lst = Orders.objects.all()
+    for order in order_lst:
+        if order.data_deliveries <= date.today():
+            send_message(user_id, text='Дата заказа №'+ str(order.number) +' истекла')
